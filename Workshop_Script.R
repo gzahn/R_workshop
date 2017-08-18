@@ -190,7 +190,7 @@ iris[iris$Species == "virginica",]
 # Write a command that will subset the iris data so that we get only the PETAL LENGTHS of the species "setosa"
 
 
-
+iris[iris$Species == "setosa","Petal.Length"] # for the column, we can just put the name in quotes
 
 
 # Let's look at the relationship between Sepal Length and Petal Length for each species
@@ -202,10 +202,56 @@ plot(x = iris$Sepal.Length, y = iris$Petal.Length) # using that handy "$" !!!
 # going back to the other way of accessing subsets of your data, namely the brackets [,], use the plot function
 # to look at the same relationship, but only for the species, "virginica"
 
+# here's an ugly way of doing that:
+plot(x = iris[iris$Species == "virginica","Sepal.Length"], y = iris[iris$Species == "virginica","Petal.Length"])
+
+# one easy way is to subset your data frame into a new one that only contains "virginica"
+virginica = iris[iris$Species == "virginica",]
+# then plot it from that
+plot(virginica$Sepal.Length, virginica$Petal.Length)
+
+#######################
+#      PACKAGES!      #
+#######################
+
+# One of the best things about R is that thousands of terribly smart people are constantly writing code for it
+# that you can use for free.  This code usually comes in what are called "packages"
+
+# It's (usually) easy to install a package, especially with R-Studio
+
+# Here's an example of how useful many of these packages can be.  This one is called ggplot2 and it is amazing
+# for making publication-quality figures, and for making them reproducible 
+# We will save ggplot2 for a future workshop, but it's a great example of how R makes your data analyses simple
+# and REPRODUCIBLE
 
 
-
-library(ggplot2)
+library(ggplot2) # library() loads a given package
 ggplot(iris, mapping = aes(x = Sepal.Length, y = Petal.Length, col = Species)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE)
+
+
+# Another handy package let's us combine two plots into one figure.
+# In this case, it let's us look at the difference between length and width simultaneously
+
+library(gridExtra)
+
+length.figure = ggplot(iris, mapping = aes(x = Sepal.Length, y = Petal.Length, col = Species)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_y_continuous(limits = c(0,8)) +
+  theme(legend.position = "none") +
+  ggtitle("LENGTH")
+
+width.figure = ggplot(iris, mapping = aes(x = Sepal.Width, y = Petal.Width, col = Species)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_y_continuous(limits = c(0,8)) +
+  theme(legend.position = c(.85,.75)) + 
+  ggtitle("WIDTH")
+
+grid.arrange(length.figure,width.figure, nrow = 1)
+
+
+# You can include that code in your report so that anyone can reproduce your exact figure.  Also, as you add data,
+# there is never a need to re-make your figures.  Just re-run your code!
