@@ -129,3 +129,83 @@ summary(glm(data[,3] ~ data[,2])) # this gives a summary table of a general line
 
 # Odds are that you will have a lot more than 10 flies and two measurements each
 # These data are usually entered into something like excel
+# Excel is great, but it's actually a binary file type that can't be read by other programs
+# What we want is called a "fixed-width" file
+# These are most commonly comma-separated (.csv) or tab-separated (.tsv)
+# Excel can export your data table in either of these formats
+
+# A comma-separated version of our "data" object looks like this (without the hashtags, of course):
+
+# "observation","wingspan","mass"
+# 1,1.2,0.43
+# 2,1.4,0.44
+# 3,1,0.32
+# 4,1.2,0.44
+# 5,1.8,0.52
+# 6,2,0.55
+# 7,2.2,0.56
+# 8,1.1,0.42
+# 9,2.3,0.51
+# 10,2,0.57
+
+# This is easy for a computer or a human to read!
+
+# We can directly import a csv file into R.  Let's test it with a rather large data table:
+# we will use the function read.csv() to import a famous data set
+
+# This famous (Fisher's or Anderson's) iris data set gives the measurements in centimeters 
+# of the variables sepal length and width and petal length and width, respectively, for 50 
+# flowers from each of 3 species of iris. The species are Iris setosa, versicolor, and virginica.
+
+read.csv("~/Desktop/iris.csv") # this prints it directly to the screen. we want to save it to an object
+
+iris = read.csv("~/Desktop/iris.csv")
+
+# Since this data table has more than just one type of entry (numeric columns AND a character column), it isn't
+# strictly a matrix, which consists of only numeric data
+# this is called a "data frame" in R, and it is one of the most common data types you will work with
+
+# take a look at the iris data frame by printing it's object to the screen
+iris
+
+# One advantage of a data frame over a matrix is that the columns (and rows) can have names
+
+# Look at the names of the columns:
+names(iris)
+
+# This makes it much easier to access certain parts of the data set using a special character, "$"
+# To just look at the data for the species, Iris virginica:
+
+iris[iris$Species == "virginica",]
+
+# There is a lot to unpack in that command...
+# First, the "$" immediately after the data frame object allows you to pick a column by name
+# Second, we are telling R to look at column "Species"
+# Third, we are telling R that in that column select only the rows that match the name "virginica" 
+# The quotes are essential, otherwise R will look for an object called virginica!
+# Last, notice that comma... remember that R needs the rows AND the columns, in that order
+#    we are telling R to give us ALL columns, but only the rows in which Species is equal to "virginica"
+# == is the symbol for "is equal to" . . . = is the symbol to assign a value to an object!
+
+# Write a command that will subset the iris data so that we get only the PETAL LENGTHS of the species "setosa"
+
+
+
+
+
+# Let's look at the relationship between Sepal Length and Petal Length for each species
+# We can use the basic plot() function
+
+plot(x = iris$Sepal.Length, y = iris$Petal.Length) # using that handy "$" !!!
+
+# okay, that's a confusing figure. All the different species are mixed together, so let's just look at one species
+# going back to the other way of accessing subsets of your data, namely the brackets [,], use the plot function
+# to look at the same relationship, but only for the species, "virginica"
+
+
+
+
+library(ggplot2)
+ggplot(iris, mapping = aes(x = Sepal.Length, y = Petal.Length, col = Species)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
