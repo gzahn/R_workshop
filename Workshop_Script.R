@@ -210,6 +210,108 @@ virginica = iris[iris$Species == "virginica",]
 # then plot it from that
 plot(virginica$Sepal.Length, virginica$Petal.Length)
 
+
+####################################
+#  Messing around with data frames #
+####################################
+
+# Let's load a really large data set
+# This data set is of fungal species abundances found in various sites in Hawaii, from both leaf surfaces 
+# and deep mesophotic coral reef algae.  The "species" are actually just similar DNA reads so we call them 
+# "operational taxonomic units" (OTUs), since they are only hypothesized to be species.
+# This data set consists of 15,183 species observations from 132 sites.
+# The first file is the species observation table
+# The second file is information about each sampling site (metadata)
+
+otus = read.csv("~/Desktop/GIT_REPOSITORIES/R_workshop/otu_table_ordered.csv", as.is = TRUE, stringsAsFactors = FALSE,
+         check.names = FALSE)
+metadata = read.csv("~/Desktop/GIT_REPOSITORIES/R_workshop/otu_mapping.csv", as.is = TRUE, stringsAsFactors = TRUE,
+         check.names = FALSE)
+
+# The object "otus" is a data frame with species as rows, and sites as columns
+# The elements (each "cell") denote how many times a given species was observed in each site
+
+# Let's look at some aspects of this large data frame
+names(otus) # This gives a list of column (site, in this case) names
+dim(otus) # This gives the count of rows and columns, in that order
+head(otus) # This prints the first 6 rows, giving us a glimpse of the top of the data frame
+class(otus) # This tells us what type of object we are looking at (this can be very useful down the road)
+row.names(otus) # This lets us see the row names (species, in this case)
+length(row.names(otus)) # This uses two functions. Read as: "give the length of the row names vector of the data frame, 'otus'"
+# This last one should be the same as element 1 of the dim() function
+
+
+# We can modify any aspect of our data frame to make it more useful.  For instance, our "species names"
+# are just numbers. Let's change them to something more meaningful using a simple example:
+
+
+species = c(paste("OTU_",1:length(row.names(otus)), sep = "")) # here we create an artificial list of species names
+# this list is the same length as our number of species and are named "OTU_1", "OTU_2", etc
+# the names don't really matter since these aren't named "species" at this point
+
+# Now we can assign this vector of species names to the otu table
+row.names(otus) = species # assign our new names to the row.names values
+row.names(otus) # take another look and see how they changed. We can assign any vector of names here
+
+
+# Let's do some simple exercises to explore our data further
+
+# Which of our sites has the most total species observations?
+
+colSums(otus) # gives the column sums. This is total abundance for each site
+plot(colSums(otus)) # we can take a quick look at the distribution in a figure
+min(colSums(otus)) # or we can look at things like minimum and maximum values
+max(colSums(otus))
+# Looks like the maximum site species abundance is 64596 total observations. Which site is this!?
+
+# The which() function will give us the elements that match a logical expression (it will return the element numbers)
+which(colSums(otus) == 64596) # we tell R to tell us which column has a sum exactly equal to 64596
+
+# we can do this without knowing the value ahead of time, too
+which(colSums(otus) == max(colSums(otus))) # we tell R to find which column has a sum equal to the maximum sum
+# this could have been more than one column if there was a tie for maximum
+
+# Let's count the number of missing species in the first column
+otus$`3P.1` # this is column 1
+otus[,1] # this is also column 1
+
+which(otus[,1] == 0) # these are the positions of all the zeroes in column 1
+length(which(otus[,1] == 0)) # this is the length of the positions of all the zeroes in column 1
+# that length is the number of zeroes
+
+
+# How many species (richness) were found in the site with the most species abundance (found in previous step)
+# HINT: R can evaluate whether each element is greater than 0 with ">0"
+
+length(which(otus[,which(colSums(otus) == max(colSums(otus)))] > 0)) # this is an ugly way to do it on one line
+
+# Step 1 - find the site with maximum abundance, and assign it to an object
+max.site = which(colSums(otus) == max(colSums(otus)))
+
+# Step 2 - Subset your otu data frame to just look at this single column
+site.vector = otus[,max.site]
+
+# Step 3 - find which elements of this column are GREATER THAN 0 (meaning species were present)
+positive.site.vector = which(site.vector > 0)
+
+# Step 4 - find the length of this vector, giving you the count of species that had at least 1 observation
+length(positive.site.vector)
+
+################################################################################
+#   We can combine simple tools like this to ask ANY question about our data!  #
+################################################################################
+
+# Which SPECIES (OTU) has the greatest abundance across the entire data set??
+# HINT: rowSums()  will be a handy function, just like colSums() was for the previous question
+
+which(rowSums(otus) == max(rowSums(otus)))
+
+
+# Which OTU is present in more sites than any other?? (This one is much tougher to answer)
+
+
+
+
 #######################
 #      PACKAGES!      #
 #######################
@@ -241,17 +343,75 @@ length.figure = ggplot(iris, mapping = aes(x = Sepal.Length, y = Petal.Length, c
   geom_smooth(method = "lm", se = FALSE) +
   scale_y_continuous(limits = c(0,8)) +
   theme(legend.position = "none") +
-  ggtitle("LENGTH")
+  ggtitle("Sepal vs. Petal LENGTH")
 
 width.figure = ggplot(iris, mapping = aes(x = Sepal.Width, y = Petal.Width, col = Species)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
   scale_y_continuous(limits = c(0,8)) +
-  theme(legend.position = c(.85,.75)) + 
-  ggtitle("WIDTH")
+  # theme(legend.position = c(.85,.75)) + 
+  ggtitle("Sepal vs. Petal WIDTH")
 
 grid.arrange(length.figure,width.figure, nrow = 1)
 
 
 # You can include that code in your report so that anyone can reproduce your exact figure.  Also, as you add data,
 # there is never a need to re-make your figures.  Just re-run your code!
+
+
+# Back to our OTU table, there is a package called "vegan" which does a billizion useful things for community ecology
+
+library(vegan)
+
+otus_pa = decostand(otus, method = "pa") # one function, decostand(), lets us standarize our data. In this case,
+# we wanted presence/absence, since we are interested in which OTU is present in more sites than any other,
+# not so much in overall abundance
+
+# otus_pa is now a version of our data frame where all positive values have been changed to 1, and zeroes stayed 0
+
+# now it's a simple exercise to find which OTU was present in the most sites
+
+summary(rowSums(otus_pa)) # take a peek at the distribution of how many sites each OTU is found in
+boxplot(rowSums(otus_pa)) # look at it graphically with a boxplot
+
+# Most OTUs are found only in one or a few sites. The most common OTU is found in 98 sites
+
+max.sites = max(rowSums(otus_pa))
+which(rowSums(otus_pa) == max.sites) # We see that OTU_1236 is the most commonly encountered by site
+
+
+#########################
+#  A bit more advanced  #
+#########################
+
+
+# We can also easily create a heatmap to look at abundances broadly
+heatmap(as.matrix(otus)) # this will take some time to run...there are > 15000 species to compute
+
+# That heatmap has some issues! It's impossible to read, the colors are ugly. I hate it.
+# Let's subset our data so we're just looking at the most abundant species
+
+abundant.otus = otus[rowSums(otus) > 10000,] # this tells R: pick only rows whose sums are greater than 10000, but show all columns
+heatmap(as.matrix(abundant.otus)) # This is easier to read, but still ugly
+?heatmap # take a look at the heatmap function and its options
+heatmap(as.matrix(abundant.otus), col = gray.colors(100)) # we can change the colors to grayscale (with 100 possible values)
+
+# We can also add color labels from our site metadata
+names(metadata) # Look at what info we have about our sites
+# This object links our sample names to which "Project" (ecosystem, in this case) and "HostTaxon" they are associated with
+
+# First, we will want to convert our "Project" information into color names for R
+
+
+unique(metadata$Project) # Find the possible values of "Project"
+# We should see two options: "Snail" and "Meso_Algae" - These represent the ecosystem from which samples were taken
+
+# We can convert these into colors using a handy function from the "plyr" package
+library(plyr)
+ecosys.colors = mapvalues(metadata$Project, from = c("Snail","Meso_Algae"), to = c("Green", "Blue"))
+
+
+heatmap(as.matrix(abundant.otus), col = gray.colors(100), ColSideColors = ecosys.colors,
+        Rowv = NA, distfun = vegdist)
+
+# This heatmap makes me happy!
