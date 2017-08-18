@@ -414,4 +414,7 @@ ecosys.colors = mapvalues(metadata$Project, from = c("Snail","Meso_Algae"), to =
 heatmap(as.matrix(abundant.otus), col = gray.colors(100), ColSideColors = ecosys.colors,
         Rowv = NA, distfun = vegdist)
 
-# This heatmap makes me happy!
+# This heatmap makes me happy! Our heatmap columns are colored by habitat and it's much easier to read.
+
+
+
