@@ -15,3 +15,4 @@ git clone https://github.com/gzahn/R_workshop
 
 ## It is recommended that you make sure you get R and R-Studio installed correctly before the workshop
 Play around with making sure you can load R-Studio (which automatically loads R when you run it)
+ 
