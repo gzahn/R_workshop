@@ -44,6 +44,7 @@ bob < jane # This gives the value "TRUE"
 
 
 
+
 ###############
 #    INPUT    #
 ###############
@@ -93,6 +94,11 @@ data
 
 data[1,3]
 
+# write the code to get the element from row 2, and column 1
+
+
+
+
 # This kind of access is very useful. To add the mass of the first 5 flies we caught, you can write:
 
 data[1,3] + data[2,3] + data[3,3] + data[4,3] + data[5,3]
@@ -121,7 +127,13 @@ plot(x=data[,2], y=data[,3]) # the plot() function wants you to give it the vect
 # Want to see if that correlation we see is statistically significant?  R makes that very simple as long as you 
 # know what tests to use!
 
-summary(glm(data[,3] ~ data[,2])) # this gives a summary table of a general linear model test
+
+
+summary(lm(data[,3] ~ data[,2])) # this gives a summary table of a simple linear regression model test
+# when R sees parentheses, it works from the outside in, performing tasks in the middle first
+# the structure of statistical models is: MODEL_NAME(DEPENDENT_VARIABLE ~ EXPLANATORY_VARIABLES) ... note the "~"
+
+
 
 #########################
 #    IMPORTING DATA     #
@@ -157,6 +169,11 @@ summary(glm(data[,3] ~ data[,2])) # this gives a summary table of a general line
 # of the variables sepal length and width and petal length and width, respectively, for 50 
 # flowers from each of 3 species of iris. The species are Iris setosa, versicolor, and virginica.
 
+# first, let's look at the function read.csv
+?read.csv
+
+
+# This file path may need to be changed on your computer. Direct it to wherever you saved the workshop files from Github.
 read.csv("~/Desktop/iris.csv") # this prints it directly to the screen. we want to save it to an object
 
 iris = read.csv("~/Desktop/iris.csv")
@@ -190,7 +207,7 @@ iris[iris$Species == "virginica",]
 # Write a command that will subset the iris data so that we get only the PETAL LENGTHS of the species "setosa"
 
 
-iris[iris$Species == "setosa","Petal.Length"] # for the column, we can just put the name in quotes
+
 
 
 # Let's look at the relationship between Sepal Length and Petal Length for each species
@@ -210,6 +227,15 @@ virginica = iris[iris$Species == "virginica",]
 # then plot it from that
 plot(virginica$Sepal.Length, virginica$Petal.Length)
 
+# Make a new data frame containing only the data from the species "setosa"
+# and plot the sepal.length vs the petal.length
+
+
+
+
+
+
+
 
 ####################################
 #  Messing around with data frames #
@@ -223,13 +249,14 @@ plot(virginica$Sepal.Length, virginica$Petal.Length)
 # The first file is the species observation table
 # The second file is information about each sampling site (metadata)
 
-otus = read.csv("~/Desktop/GIT_REPOSITORIES/R_workshop/otu_table_ordered.csv", as.is = TRUE, stringsAsFactors = FALSE,
+otus = read.csv("~/Desktop/GIT_REPOSITORIES/R_workshop/otu_table.csv", as.is = TRUE, stringsAsFactors = FALSE,
          check.names = FALSE)
 metadata = read.csv("~/Desktop/GIT_REPOSITORIES/R_workshop/otu_mapping.csv", as.is = TRUE, stringsAsFactors = TRUE,
          check.names = FALSE)
 
 # The object "otus" is a data frame with species as rows, and sites as columns
 # The elements (each "cell") denote how many times a given species was observed in each site
+
 
 # Let's look at some aspects of this large data frame
 names(otus) # This gives a list of column (site, in this case) names
@@ -248,6 +275,24 @@ length(row.names(otus)) # This uses two functions. Read as: "give the length of 
 species = c(paste("OTU_",1:length(row.names(otus)), sep = "")) # here we create an artificial list of species names
 # this list is the same length as our number of species and are named "OTU_1", "OTU_2", etc
 # the names don't really matter since these aren't named "species" at this point
+# There's a lot to unpack in this command:
+#     Working from the inside out...
+#     First function we see is row.names() which returns a vector of row names from the object "otus"
+#     Second, the length() function gives us the length of that vector
+#     Third, the paste() function will paste each element from one or more vectors together
+#     Fourth, the c() function concatenates all those pasted values into a list
+#     This list is then assigned to the object "species"
+
+# Take a look at the documentation for the paste() function...
+
+
+
+
+# We pasted the string "OTU_" onto the sequence of numbers 1 through the length of our row.names vector
+# Look at the "Species" vector to see what this looks like
+
+
+
 
 # Now we can assign this vector of species names to the otu table
 row.names(otus) = species # assign our new names to the row.names values
@@ -262,10 +307,16 @@ colSums(otus) # gives the column sums. This is total abundance for each site
 plot(colSums(otus)) # we can take a quick look at the distribution in a figure
 min(colSums(otus)) # or we can look at things like minimum and maximum values
 max(colSums(otus))
+
 # Looks like the maximum site species abundance is 64596 total observations. Which site is this!?
+
+
 
 # The which() function will give us the elements that match a logical expression (it will return the element numbers)
 which(colSums(otus) == 64596) # we tell R to tell us which column has a sum exactly equal to 64596
+# which() performs a logical test on each element of an object and returns the element number of those that are "TRUE"
+
+
 
 # we can do this without knowing the value ahead of time, too
 which(colSums(otus) == max(colSums(otus))) # we tell R to find which column has a sum equal to the maximum sum
@@ -286,16 +337,16 @@ length(which(otus[,1] == 0)) # this is the length of the positions of all the ze
 length(which(otus[,which(colSums(otus) == max(colSums(otus)))] > 0)) # this is an ugly way to do it on one line
 
 # Step 1 - find the site with maximum abundance, and assign it to an object
-max.site = which(colSums(otus) == max(colSums(otus)))
+
 
 # Step 2 - Subset your otu data frame to just look at this single column
-site.vector = otus[,max.site]
+
 
 # Step 3 - find which elements of this column are GREATER THAN 0 (meaning species were present)
-positive.site.vector = which(site.vector > 0)
+
 
 # Step 4 - find the length of this vector, giving you the count of species that had at least 1 observation
-length(positive.site.vector)
+
 
 ################################################################################
 #   We can combine simple tools like this to ask ANY question about our data!  #
@@ -304,10 +355,18 @@ length(positive.site.vector)
 # Which SPECIES (OTU) has the greatest abundance across the entire data set??
 # HINT: rowSums()  will be a handy function, just like colSums() was for the previous question
 
-which(rowSums(otus) == max(rowSums(otus)))
+
 
 
 # Which OTU is present in more sites than any other?? (This one is much tougher to answer)
+
+
+
+# What steps would you need to take in order to answer this question???
+
+
+
+
 
 
 
@@ -326,15 +385,19 @@ which(rowSums(otus) == max(rowSums(otus)))
 # We will save ggplot2 for a future workshop, but it's a great example of how R makes your data analyses simple
 # and REPRODUCIBLE
 
+install.packages("ggplot2") # you can install it this way or through R-Studio's GUI
 
 library(ggplot2) # library() loads a given package
 ggplot(iris, mapping = aes(x = Sepal.Length, y = Petal.Length, col = Species)) +
   geom_point() +
-  geom_smooth(method = "lm", se = FALSE)
+  geom_smooth(method = "lm", se = FALSE) +
+  ggtitle("Sepal vs. Petal Lengths for Each Iris Species")
 
 
 # Another handy package let's us combine two plots into one figure.
 # In this case, it let's us look at the difference between length and width simultaneously
+
+install.packages("gridExtra")
 
 library(gridExtra)
 
@@ -361,11 +424,19 @@ grid.arrange(length.figure,width.figure, nrow = 1)
 
 # Back to our OTU table, there is a package called "vegan" which does a billizion useful things for community ecology
 
+install.packages("vegan")
+
 library(vegan)
 
 otus_pa = decostand(otus, method = "pa") # one function, decostand(), lets us standarize our data. In this case,
 # we wanted presence/absence, since we are interested in which OTU is present in more sites than any other,
 # not so much in overall abundance
+
+# Take a look at all the options for using decostand()
+# Is our data frame set up properly for the default settings??
+
+
+
 
 # otus_pa is now a version of our data frame where all positive values have been changed to 1, and zeroes stayed 0
 
@@ -377,7 +448,12 @@ boxplot(rowSums(otus_pa)) # look at it graphically with a boxplot
 # Most OTUs are found only in one or a few sites. The most common OTU is found in 98 sites
 
 max.sites = max(rowSums(otus_pa))
-which(rowSums(otus_pa) == max.sites) # We see that OTU_1236 is the most commonly encountered by site
+which(rowSums(otus_pa) == max.sites) # We see that the OTU at row 1236 is the most commonly encountered by site
+
+# How would we get R to return the row name of this OTU???
+
+
+
 
 
 #########################
@@ -406,7 +482,9 @@ names(metadata) # Look at what info we have about our sites
 unique(metadata$Project) # Find the possible values of "Project"
 # We should see two options: "Snail" and "Meso_Algae" - These represent the ecosystem from which samples were taken
 
-# We can convert these into colors using a handy function from the "plyr" package
+# We can convert these into color names R can read by using a handy function from the "plyr" package called mapvalues()
+install.packages("plyr")
+
 library(plyr)
 ecosys.colors = mapvalues(metadata$Project, from = c("Snail","Meso_Algae"), to = c("Green", "Blue"))
 
