@@ -142,7 +142,7 @@ summary(lm(data[,3] ~ data[,2])) # this gives a summary table of a simple linear
 # Odds are that you will have a lot more than 10 flies and two measurements each
 # These data are usually entered into something like excel
 # Excel is great, but it's actually a binary file type that can't be read by other programs
-# What we want is called a "fixed-width" file
+# What we want is called a "delimited" file
 # These are most commonly comma-separated (.csv) or tab-separated (.tsv)
 # Excel can export your data table in either of these formats
 
