@@ -142,7 +142,7 @@ summary(lm(data[,3] ~ data[,2])) # this gives a summary table of a simple linear
 # Odds are that you will have a lot more than 10 flies and two measurements each
 # These data are usually entered into something like excel
 # Excel is great, but it's actually a binary file type that can't be read by other programs
-# What we want is called a "delimited" file
+# What we want is called a "fixed-width" file
 # These are most commonly comma-separated (.csv) or tab-separated (.tsv)
 # Excel can export your data table in either of these formats
 
@@ -421,6 +421,7 @@ grid.arrange(length.figure,width.figure, nrow = 1)
 # You can include that code in your report so that anyone can reproduce your exact figure.  Also, as you add data,
 # there is never a need to re-make your figures.  Just re-run your code!
 
+# Show https://cran.r-project.org/
 
 # Back to our OTU table, there is a package called "vegan" which does a billizion useful things for community ecology
 
@@ -461,6 +462,16 @@ which(rowSums(otus_pa) == max.sites) # We see that the OTU at row 1236 is the mo
 #########################
 
 
+MDS = metaMDS(otus)
+# empty rows! Let's remove them.
+
+which(rowSums(otus) == 0)
+
+
+otus_2 = otus[which(rowSums(otus) != 0),]
+
+MDS = metaMDS(otus_2)
+
 # We can also easily create a heatmap to look at abundances broadly
 heatmap(as.matrix(otus)) # this will take some time to run...there are > 15000 species to compute
 
@@ -495,4 +506,49 @@ heatmap(as.matrix(abundant.otus), col = gray.colors(100), ColSideColors = ecosys
 # This heatmap makes me happy! Our heatmap columns are colored by habitat and it's much easier to read.
 
 
+
+
+
+#Jonckheere-Terpstra Tests
+
+
+library(clinfun)
+set.seed(1234)
+g <- rep(1:5, rep(10,5))
+x <- rnorm(50)
+jonckheere.test(x+0.3*g, g)
+x[1:2] <- mean(x[1:2]) # tied data
+jonckheere.test(x+0.3*g, g)
+jonckheere.test(x+0.3*g, g, nperm=5000)
+
+?kruskal.test()
+
+
+# Print results directly to a file
+
+sink(file = "~/Desktop/sinkfile.txt")
+cat("\tExample text\n\n")
+jonckheere.test(x+0.3*g, g, nperm=5000)
+cat("\n\nExample Text 2")
+sink()
+
+
+
+
+### Basic R functions
+
+a.function = function(x){
+  result = x+1
+  result
+}
+
+a.function(3)
+
+# Look in your environment window. Do you see the object "result" in there?
+
+# Need to assign values to variables in global environment if you want to access them outside of the function later
+x.function = function(x){
+  assign(x, c(1,2,3,4), envir = .GlobalEnv)
+}
+x.function("soo")
 
